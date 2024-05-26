@@ -1,17 +1,16 @@
 import os
 from dotenv import load_dotenv
-import streamlit as st
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 import webbrowser
+import streamlit as st
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 
-# Load environment variables from .env file (only for local development)
-if os.path.exists(".env"):
-    load_dotenv(".env")
+# Load environment variables from .env file
+load_dotenv()
 
-# Access the Hugging Face API key
-HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY") or st.secrets["HUGGINGFACE_API_KEY"]
+# Get the Hugging Face API key from the environment variable
+HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
 
-# Define model names mapping
+# Define model names mapping if needed
 MODEL_NAMES = {
     "llama-2-7b": "your-huggingface-model-name-for-llama-2-7b",
     "llama-2-13b": "your-huggingface-model-name-for-llama-2-13b",
@@ -22,11 +21,12 @@ MODEL_NAMES = {
 def call_llama_model(prompt, model_name):
     try:
         model_name_hf = MODEL_NAMES[model_name]
+        api_key = HUGGINGFACE_API_KEY
 
-        tokenizer = AutoTokenizer.from_pretrained(model_name_hf, use_auth_token=HUGGINGFACE_API_KEY)
-        model = AutoModelForCausalLM.from_pretrained(model_name_hf, use_auth_token=HUGGINGFACE_API_KEY)
+        tokenizer = AutoTokenizer.from_pretrained(model_name_hf, use_auth_token=api_key)
+        model = AutoModelForCausalLM.from_pretrained(model_name_hf, use_auth_token=api_key)
 
-        generator = pipeline("text-generation", model=model, tokenizer=tokenizer, use_auth_token=HUGGINGFACE_API_KEY)
+        generator = pipeline("text-generation", model=model, tokenizer=tokenizer, use_auth_token=api_key)
         response = generator(prompt, max_length=100, num_return_sequences=1)[0]["generated_text"]
 
         return response
@@ -65,6 +65,6 @@ for speaker, text in st.session_state['chat_history']:
 
 # Function to open the link back to the blog
 def open_blog():
-    webbrowser.open_new_tab("https://www.google.com/index.html")
+    webbrowser.open_new_tab("https://main--dhub-blog02.netlify.app/")
 
 st.sidebar.button("Back to Blog", on_click=open_blog)
